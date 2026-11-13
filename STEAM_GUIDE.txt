@@ -1,0 +1,172 @@
+Гайд для https://steamcommunity.com/app/8930/guides/  (Steam → Руководства → Создать руководство)
+Каждый блок ниже — отдельное поле/раздел в редакторе Steam. Разметка — Steam BBCode.
+Картинка-обложка обязательна (квадратная, от 195×195): подойдёт скриншот главного меню на русском.
+
+========================================================================
+НАЗВАНИЕ (Title)
+========================================================================
+[Mac] Игра с Windows по сети, русский язык, текстуры 2k / Mac ↔ Windows multiplayer, Russian, 2k textures
+
+========================================================================
+ОПИСАНИЕ (Description)
+========================================================================
+Mac-версия (Aspyr): как играть по сети с друзьями на Windows («несовпадение версии»), поставить русский язык, текстуры карты 2k и скрытые опции, и что делать, если игра не запускается. Скрипты с откатом и запуском двойным щелчком. / Mac version (Aspyr): play online with friends on Windows ("version mismatch"), Russian language, 2k map textures, hidden options, and what to do if the game won't start. Scripts with rollback and double-click launchers.
+
+Категория (Category): Multiplayer / Modding.  Язык (Language): Русский; в тексте есть английский / Russian, with English text included.
+
+========================================================================
+РАЗДЕЛ 1 — Что это / What is this
+========================================================================
+Mac-версия Civilization V в Steam — это порт Aspyr. На Apple Silicon он работает через Rosetta. С Windows-игроками по сети он не соединяется, русского языка в нём нет, а после любых правок файлов macOS перестаёт его запускать. Ниже — рабочие решения. Проверено на MacBook M4 Pro (macOS 27) в партиях с двумя Windows-игроками на 146–160 ходов.
+
+Всё собрано в скрипты с откатом, есть файлы для двойного щелчка в Finder:
+[url=https://github.com/gnomi43/civ5-mac]github.com/gnomi43/civ5-mac[/url]
+
+[hr][/hr]
+
+The Steam Mac version of Civilization V is an Aspyr port. On Apple Silicon it runs under Rosetta. It won't connect to Windows players online, has no Russian, and macOS stops launching it after any change to its files. Below are working fixes, tested on an M4 Pro MacBook (macOS 27) in 146–160-turn games with two Windows players.
+
+Everything is packaged as scripts with rollback, plus double-click launchers for Finder:
+[url=https://github.com/gnomi43/civ5-mac]github.com/gnomi43/civ5-mac[/url]
+
+========================================================================
+РАЗДЕЛ 2 — Игра по сети с Windows / Multiplayer with Windows
+========================================================================
+[h2]«Несовпадение версии с игроком»[/h2]
+Mac-версия сообщает номер сборки [b]180925[/b], Windows — [b]403694[/b]. Правила одинаковые, но игра сравнивает номера и не пускает в лобби.
+
+[b]Что сделать (игра закрыта):[/b] заменить 180925 на 403694 в двух файлах внутри приложения (правый щелчок по Civilization V.app → «Показать содержимое пакета»):
+[list]
+[*][i]Contents/Info.plist[/i] — CFBundleVersion
+[*][i]Contents/AspyrAssets/global/String/App.json[/i] — App.Build
+[/list]
+Потом [b]обязательно переподписать[/b] приложение (см. раздел 3). Скрипт [i]Civ5-crossplay/crossplay.sh install[/i] делает всё сразу и сохраняет оригиналы.
+
+[list]
+[*]Windows-игрокам ничего делать не нужно.
+[*]Дополнения и DLC должны быть одинаковыми у всех.
+[*]Рассинхроны бывают (у нас около 7 за 146 ходов). Хост жмёт «Пересинхронизировать», игра продолжается. Во время войн помогают гибридные ходы.
+[*]После обновления игры или «Проверки целостности» номер сборки снова 180925 — повторить.
+[/list]
+
+[hr][/hr]
+
+[h2]"Version mismatch"[/h2]
+The Mac version reports build [b]180925[/b], Windows reports [b]403694[/b]. The rules are the same, but the game compares the numbers and won't let you into the lobby.
+
+[b]What to do (game closed):[/b] replace 180925 with 403694 in two files inside the app (right-click Civilization V.app → Show Package Contents):
+[list]
+[*][i]Contents/Info.plist[/i] — CFBundleVersion
+[*][i]Contents/AspyrAssets/global/String/App.json[/i] — App.Build
+[/list]
+Then [b]re-sign[/b] the app (section 3). The script [i]Civ5-crossplay/crossplay.sh install[/i] does all of it and keeps the originals.
+
+[list]
+[*]Windows players don't need to do anything.
+[*]Everyone needs the same expansions and DLC.
+[*]Desyncs happen (about 7 in 146 turns for us). The host clicks "Resync" and the game goes on. Hybrid turns help during wars.
+[*]A game update or "Verify integrity" puts the build back to 180925, so redo it.
+[/list]
+
+========================================================================
+РАЗДЕЛ 3 — Игра не запускается / Game won't start
+========================================================================
+[h2]«OS Error 256» / «Программа не может быть открыта»[/h2]
+Любая правка файлов игры ломает подпись Aspyr, и macOS убивает лаунчер (в отчёте о сбое: [i]Code Signature Invalid[/i]). [b]Подвох:[/b] может проявиться не сразу, а через несколько дней. Лечение (игра закрыта), в Терминале:
+[code]codesign --force --deep --sign - ~/Library/Application\ Support/Steam/steamapps/common/Sid\ Meier\'s\ Civilization\ V/Civilization\ V.app[/code]
+Xcode не нужен. Переподписывать после [b]любой[/b] правки. Без Терминала — файл «4. Починить запуск» из репозитория.
+
+[h2]Игра открывается и через ~20 секунд сама закрывается[/h2]
+Отчёта о сбое нет, в [i]Logs/Database.log[/i]: «Failed to Load database», «no such table: Languages». Испорчен кэш текстов — пустой [i]Localization-Merged.db[/i]. У нас так вышло после удаления всей папки кэша разом.
+[b]Лечение:[/b] при закрытой игре удалить только [i]Localization-*.db[/i] в [i]~/Library/Application Support/Sid Meier's Civilization 5/cache/[/i]. [b]Весь cache/*.db не удалять.[/b]
+
+[hr][/hr]
+
+[h2]"OS Error 256" / "The application can't be opened"[/h2]
+Any change to the game files breaks Aspyr's signature, and macOS kills the launcher (the crash report says [i]Code Signature Invalid[/i]). [b]Gotcha:[/b] this can show up days later, not right away. Fix (game closed), in Terminal:
+[code]codesign --force --deep --sign - ~/Library/Application\ Support/Steam/steamapps/common/Sid\ Meier\'s\ Civilization\ V/Civilization\ V.app[/code]
+No Xcode needed. Re-sign after [b]any[/b] change. Without Terminal: the "4. Починить запуск" (Fix launch) file from the repo.
+
+[h2]The game opens and quits by itself after ~20 seconds[/h2]
+No crash report. [i]Logs/Database.log[/i] shows "Failed to Load database", "no such table: Languages". The text cache is broken: an empty [i]Localization-Merged.db[/i]. For us it happened after deleting the whole cache folder at once.
+[b]Fix:[/b] with the game closed, delete only [i]Localization-*.db[/i] in [i]~/Library/Application Support/Sid Meier's Civilization 5/cache/[/i]. [b]Don't delete all of cache/*.db.[/b]
+
+========================================================================
+РАЗДЕЛ 4 — Русский язык / Russian language
+========================================================================
+В Mac-сборке русского нет. Русские тексты и озвучка есть в Windows-версии игры. Их можно перенести на Mac из своего Steam-аккаунта. Файлы игры я не выкладываю, только скрипты. Грабли, на которые мы наступили:
+[list]
+[*]В шрифте игры (Tw Cen MT) нет кириллицы — нужны свои шрифтовые атласы.
+[*][b]UseExtendedFont[/b] в Russian.xml должен быть 0, иначе Mac-версия падает при загрузке.
+[*]Пустые списки в настройке сетевой партии — из-за Locale.Compare в Lua-файлах интерфейса, нужно заменить на обычное сравнение строк.
+[*]В официальном переводе есть ошибки во множественном числе (Всемирный конгресс, подсказки голосов). Они видны в Logs/Localization.log как ERR.
+[*]Вступительный ролик останется на английском: в Mac-версии он есть только на английском, немецком и французском.
+[/list]
+
+[hr][/hr]
+
+The Mac build has no Russian. The Russian text and voice-over exist in the Windows version. You can bring them to Mac from your own Steam account. I don't publish game files, only scripts. Pitfalls we hit:
+[list]
+[*]The game font (Tw Cen MT) has no Cyrillic, so you need your own font atlases.
+[*][b]UseExtendedFont[/b] in Russian.xml must be 0, or the Mac version crashes while loading.
+[*]Empty lists in multiplayer game setup come from Locale.Compare in the UI Lua files. Replace it with a plain string comparison.
+[*]The official translation has plural-form errors (World Congress, vote tooltips). They show up as ERR in Logs/Localization.log.
+[*]The intro movie stays in English: the Mac version only ships it in English, German and French.
+[/list]
+
+========================================================================
+РАЗДЕЛ 5 — Текстуры карты 2k / 2k map textures
+========================================================================
+Мод [url=https://forums.civfanatics.com/threads/terrain-texture-enhancement-2k.570307/]Terrain Texture Enhancement 2k[/url] (автор Estebanium) работает и на Mac: местность в 2048×2048 вместо 1024. Как поставить:
+[olist]
+[*]Папку [i]TTE_2k[/i] из архива положить в [i]Civilization V.app/Contents/Assets/Assets/DLC/[/i].
+[*]Удалить [i]cache/Localization-*.db[/i] (см. раздел 3).
+[*]Переподписать приложение.
+[/olist]
+Скрипт: [i]Civ5-terrain/terrain.sh install[/i]. С Windows-игроками, у которых этого мода нет, пока не проверяли.
+
+[hr][/hr]
+
+The [url=https://forums.civfanatics.com/threads/terrain-texture-enhancement-2k.570307/]Terrain Texture Enhancement 2k[/url] mod (by Estebanium) works on Mac too: terrain at 2048×2048 instead of 1024. To install:
+[olist]
+[*]Put the [i]TTE_2k[/i] folder from the archive into [i]Civilization V.app/Contents/Assets/Assets/DLC/[/i].
+[*]Delete [i]cache/Localization-*.db[/i] (section 3).
+[*]Re-sign the app.
+[/olist]
+Script: [i]Civ5-terrain/terrain.sh install[/i]. Not yet tested with Windows players who don't have the mod.
+
+========================================================================
+РАЗДЕЛ 6 — Скрытые опции и графика / Hidden options and graphics
+========================================================================
+В [i]CIV5GameOptions*.xml[/i] (база, G&K, BNW) у части опций стоит [i]<Visible>0</Visible>[/i]. Если поменять на 1, 11 опций появятся в «Дополнительных настройках» и в настройке сетевой игры. Скрипт: [i]options.sh[/i]. После правки переподписать.
+[i]tweaks.sh[/i] выставляет 23 настройки графики и удобства под Apple Silicon. VSync лучше включить в настройках самой игры: иначе меню грузит видеокарту на 80 %.
+Перед сетевой игрой закройте тяжёлые программы (Docker, много вкладок): при нехватке памяти игра подтормаживает.
+
+[hr][/hr]
+
+In [i]CIV5GameOptions*.xml[/i] (base, G&K, BNW) some options are set to [i]<Visible>0</Visible>[/i]. Change them to 1 and 11 options show up in Advanced Setup and in multiplayer setup. Script: [i]options.sh[/i]. Re-sign afterwards.
+[i]tweaks.sh[/i] applies 23 graphics and convenience settings for Apple Silicon. Turn VSync on in the game's own settings, or the menu loads the GPU to 80 %.
+Close heavy apps (Docker, lots of browser tabs) before multiplayer: the game stutters when memory runs low.
+
+========================================================================
+РАЗДЕЛ 7 — Как поставить скрипты / Installing the scripts
+========================================================================
+[olist]
+[*]На [url=https://github.com/gnomi43/civ5-mac]GitHub[/url]: Code → Download ZIP, распаковать, переименовать в [i]Civ5-Mac[/i], положить в «Загрузки».
+[*]Один раз запустить игру из Steam и выйти из главного меню.
+[*]Двойной щелчок по «1. Установить или обновить». Если macOS не пускает: правый щелчок → «Открыть» → «Открыть».
+[*]Проверка — «2. Проверить», починка — «4. Починить запуск», откат — «5. Удалить всё».
+[/olist]
+После каждого обновления игры в Steam снова запускать «1. Установить или обновить».
+
+[hr][/hr]
+
+[olist]
+[*]On [url=https://github.com/gnomi43/civ5-mac]GitHub[/url]: Code → Download ZIP, unzip, rename the folder to [i]Civ5-Mac[/i], put it in Downloads.
+[*]Launch the game from Steam once and quit from the main menu.
+[*]Double-click "1. Установить или обновить" (Install or update). If macOS blocks it: right-click → Open → Open.
+[*]To check, use "2. Проверить" (Check). To fix, "4. Починить запуск" (Fix launch). To roll back, "5. Удалить всё" (Remove all).
+[/olist]
+Run "1. Установить или обновить" again after every Steam update of the game.
+
+Вопросы и свои находки — в комментарии. / Questions and findings are welcome in the comments.
